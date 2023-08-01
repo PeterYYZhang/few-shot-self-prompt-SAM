@@ -7,10 +7,12 @@ Yaoo
 3. Add dataset link
 4. Decorate the git repo add a github page
 5. Add abstract and Model picture and results
+6. Modify abstract: No revolutionizing(reviewer 3)
+7. Comparing to Zhou et al.???
 
 ## Experiment
 1. Unet -- Yao
-2. Original SAM
+2. Original SAM, prompt sam --Qi
 3. Use log reg on the image directly
 
 ## Setup
