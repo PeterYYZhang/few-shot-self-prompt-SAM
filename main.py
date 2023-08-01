@@ -359,7 +359,7 @@ def main():
     parser.add_argument('--k', type=int, default=10, help='number of pics')
     parser.add_argument('--data_path', type=str, default='./data/Kvasir-SEG', help='path to train data')
     parser.add_argument('--model_type', type=str, default='vit_b', help='SAM model type')
-    parser.add_argument('--checkpoint', type=str, default='./sam_vit_b_01ec64.pth', help='SAM checkpoint')
+    parser.add_argument('--checkpoint', type=str, default='./checkpoint/sam_vit_b_01ec64.pth', help='SAM checkpoint')
     parser.add_argument('--visualize', type=bool, default=True, help='visualize the results')
     parser.add_argument('--save_path', type=str, default='./results', help='path to save the results')
     parser.add_argument('--visualize_num', type=int, default=30, help='number of pics to visualize')

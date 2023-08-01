@@ -15,6 +15,16 @@ Yaoo
 2. Original SAM, prompt sam --Qi
 3. Use log reg on the image directly
 
-## Setup
-1. First get the SAM ```pip install git+https://github.com/facebookresearch/segment-anything.git```
-
+## Requirements
+The codes is tested on 
+- Python 3.11.4
+- PyTorch 2.0.1
+- Nvidia GPU (RTX 3090) with CUDA version 11.7
+1. First run ```conda env create -f environment.yml```
+2. Following guidelines from the official repo of [Segment Anything](https://github.com/facebookresearch/segment-anything/tree/main),
+```pip install git+https://github.com/facebookresearch/segment-anything.git```
+```pip install opencv-python pycocotools matplotlib onnxruntime onnx```
+3. Download the checkpoints of the ViT model for SAM and put it under ```./checkpoints```
+- ```vit_b(default)```: [ViT-B SAM model](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth)
+- ```vit_l```: [ViT-L SAM model](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth)
+- ```vit_h```: [ViT-H SAM model](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)
