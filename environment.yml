@@ -1,0 +1,9 @@
+name: FSSP
+channels:
+  - defaults
+dependencies:
+  - pytorch
+  - torchvision
+  - pytorch-cuda=11.7
+  - scikit-learn
+  - tqdm
