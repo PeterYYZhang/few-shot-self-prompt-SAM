@@ -34,7 +34,9 @@ The codes is tested on
 5. Download the dataset from the link [Kvasir-SEG](https://drive.google.com/file/d/1AFbMOHdiSrd1gsIbA0iQptYNApnp_l6b/view?usp=share_link)
 
 ## Usage
-- To get the visualization results: run ```python main.py --checkpoint <path/to/checkpoints/```
+- To get the visualization (30) results: run ```python main.py --checkpoint <path/to/checkpoints/checkpoint> --model_type <model_type> --data_path <path/to/data> --k <num_of_training_images> --visualize True --visualize_num 30```
+and then the results will be seen under ```./results```.
+- To get the result for 5-fold validation: run ```python main.py --checkpoint <path/to/checkpoints/checkpoint> --model_type <model_type> --data_path <path/to/data> --k <num_of_training_images> --visualize False >> validation_result.txt```
 ## To Do
 ### Yaoo
 1. <s>add codes for Kvasir dataset/ </s> ISIC2018
