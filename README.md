@@ -24,14 +24,17 @@ The codes is tested on
 - PyTorch 2.0.1
 - Nvidia GPU (RTX 3090) with CUDA version 11.7
 1. First run ```conda env create -f environment.yml```
-2. Following guidelines from the official repo of [Segment Anything](https://github.com/facebookresearch/segment-anything/tree/main),
+2. Packages for SAM ```pip install opencv-python pycocotools matplotlib onnxruntime onnx```
+3. (Optional) We have already clone the SAM repo here. If not working, please follo the guidelines from the official repo of [Segment Anything](https://github.com/facebookresearch/segment-anything/tree/main),
 ```pip install git+https://github.com/facebookresearch/segment-anything.git```
-```pip install opencv-python pycocotools matplotlib onnxruntime onnx```
-3. Download the checkpoints of the ViT model for SAM and put it under ```./checkpoints```
+4. Download the checkpoints of the ViT model for SAM and put it under ```./checkpoints```
 - ```vit_b(default)```: [ViT-B SAM model](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth)
 - ```vit_l```: [ViT-L SAM model](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth)
 - ```vit_h```: [ViT-H SAM model](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)
-4. Download the dataset from the link [Kvasir-SEG](https://drive.google.com/file/d/1AFbMOHdiSrd1gsIbA0iQptYNApnp_l6b/view?usp=share_link)
+5. Download the dataset from the link [Kvasir-SEG](https://drive.google.com/file/d/1AFbMOHdiSrd1gsIbA0iQptYNApnp_l6b/view?usp=share_link)
+
+## Usage
+- To get the visualization results: run ```python main.py --checkpoint <path/to/checkpoints/```
 ## To Do
 ### Yaoo
 1. <s>add codes for Kvasir dataset/ </s> ISIC2018
