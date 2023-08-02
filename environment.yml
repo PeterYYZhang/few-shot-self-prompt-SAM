@@ -1,5 +1,7 @@
 name: FSSP
 channels:
+  - pytorch
+  - nvidia
   - defaults
 dependencies:
   - pytorch

@@ -43,7 +43,7 @@ and then the results will be seen under ```./results```.
 2. <s>Write env setup
 3. Add dataset link</s>
 4. Decorate the git repo add a github page
-5. Add abstract and Model picture and results
+5. <s>Add abstract and Model picture and results</s>
 6. Modify abstract: No revolutionizing(reviewer 3)
 7. Comparing to Zhou et al.???
 
