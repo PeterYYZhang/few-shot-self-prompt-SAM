@@ -1,5 +1,5 @@
-# few-shot-self-prompt-SAM
-This is the official repo for "Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation"
+# Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation
+This is the official repo for "Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation" to appear in MICCAI 2023 Workshop on [Domain Adaptation and Representation Transfer (DART)](https://sites.google.com/view/dart2023/home)
 
 ![Model Framework](./images/framework.jpg)
 Recent advancements in large foundation models have revo-
