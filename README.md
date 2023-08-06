@@ -3,8 +3,7 @@
 This is the official repo for "Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation" to appear in MICCAI 2023 Workshop on [Domain Adaptation and Representation Transfer (DART)](https://sites.google.com/view/dart2023/home)
 
 ![Model Framework](./images/framework.jpg)
-Recent advancements in large foundation models have revo-
-lutionized the medical industry due to their flexible prompting capability.
+Recent advancements in large foundation models have shown promising potential in the medical industry due to their flexible prompting capability.
 One such model, the Segment Anything Model (SAM), a prompt-driven
 segmentation model, has shown remarkable performance improvements,
 surpassing state-of-the-art approaches in medical image segmentation.
