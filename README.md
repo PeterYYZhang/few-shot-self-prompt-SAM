@@ -23,17 +23,4 @@ The codes is tested on
 - To get the visualization (30) results: run ```python main.py --checkpoint <path/to/checkpoints/checkpoint> --model_type <model_type> --data_path <path/to/data> --k <num_of_training_images> --visualize True --visualize_num 30```
 and then the results will be seen under ```./results```.
 - To get the result for 5-fold validation: run ```python main.py --checkpoint <path/to/checkpoints/checkpoint> --model_type <model_type> --data_path <path/to/data> --k <num_of_training_images> --visualize False >> validation_result.txt```
-## To Do
-### Yaoo
-1. <s>add codes for Kvasir dataset/ </s> ISIC2018
-2. <s>Write env setup
-3. Add dataset link</s>
-4. Decorate the git repo add a github page
-5. <s>Add abstract and Model picture and results</s>
-6. Modify abstract: No revolutionizing(reviewer 3)
-7. Comparing to Zhou et al.???
 
-### Experiment
-1. Unet -- Yao
-2. Original SAM, prompt sam --Qi
-3. Use log reg on the image directly
