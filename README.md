@@ -1,6 +1,7 @@
 # Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation
 ## Introduction
 This is the official repo for "Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation" to appear in MICCAI 2023 Workshop on [Domain Adaptation and Representation Transfer (DART)](https://sites.google.com/view/dart2023/home)
+The [paper](arxiv.org/abs/2308.07624v1) is available.
 
 ![Model Framework](./images/framework.jpg)
 Recent advancements in large foundation models have shown promising potential in the medical industry due to their flexible prompting capability. One such model, the Segment Anything Model (SAM), a prompt-driven segmentation model, has shown remarkable performance improvements, surpassing state-of-the-art approaches in medical image segmentation. However, existing methods primarily rely on tuning strategies that require extensive data or prior prompts tailored to the specific task, making it particularly challenging when only a limited number of data samples are available. In this paper, we propose a novel perspective on self-prompting in medical vision applications. Specifically, we harness the embedding space of SAM to prompt itself through a simple yet effective linear pixel-wise classifier. By preserving the encoding capabilities of the large model, the contextual information from its decoder, and leveraging its interactive promptability, we achieve competitive results on multiple datasets (i.e. improvement of more than 15\% compared to fine-tuning the mask decoder using a few images).
