@@ -1,6 +1,6 @@
 # [Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation](arxiv.org/abs/2308.07624v1)
 ## Introduction
-This is the official repo for "Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation" to appear in MICCAI 2023 Workshop on [Domain Adaptation and Representation Transfer (DART)](https://sites.google.com/view/dart2023/home)
+This is the official repo for ["Self-Prompting Large Vision Models for Few-Shot Medical Image Segmentation"](https://arxiv.org/abs/2308.07624) to appear in MICCAI 2023 Workshop on [Domain Adaptation and Representation Transfer (DART)](https://sites.google.com/view/dart2023/home)
 
 
 ![Model Framework](./images/framework.gif)
