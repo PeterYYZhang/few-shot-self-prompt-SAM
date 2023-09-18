@@ -14,10 +14,11 @@ from utils.utils import *
 import time
 
 
-def get_embedding(img, predictor):
+def get_embedding(img):
     predictor.set_image(img)
     img_emb = predictor.get_image_embedding()
     return img_emb
+
 
 def train(args):
     data_path = args.data_path
@@ -25,20 +26,17 @@ def train(args):
     checkpoint = args.checkpoint
     device = args.device
     assert os.path.exists(data_path), 'data path does not exist!'
-    # register SAM
-    sam = sam_model_registry[model_type](checkpoint=checkpoint).to(device)
-    mask_generator = SamAutomaticMaskGenerator(sam)
-    predictor = SamPredictor(sam)
-    print('SAM model loaded!', '\n')
+
+
     num_image = args.k
-    i = 0 
+    i = 0
     fnames = os.listdir(os.path.join(data_path, 'images'))
     # get 20 random indices from fnames
     random.shuffle(fnames)
     fnames = fnames[:num_image]
     image_embeddings = []
     labels = []
-    
+
     # get the image embeddings
     print('Start training...')
     t1 = time.time()
@@ -48,55 +46,51 @@ def train(args):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mask = cv2.imread(os.path.join(data_path, 'masks', fname))
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
-        _, mask = cv2.threshold(mask, 128, 1, cv2.THRESH_BINARY)
+        _, mask = cv2.threshold(mask, 128, 1, cv2.THRESH_BINARY)  # 二值化，将255转到0-1之间
         downsampled_mask = cv2.resize(mask, dsize=(64, 64), interpolation=cv2.INTER_NEAREST)
-         
-        img_emb = get_embedding(image, predictor)
+
+        img_emb = get_embedding(image)
         img_emb = img_emb.cpu().numpy().transpose((2, 3, 1, 0)).reshape((64, 64, 256)).reshape(-1, 256)
         image_embeddings.append(img_emb)
 
         labels.append(downsampled_mask.flatten())
-        
+
         i += 1
         if i > num_image: break
     t2 = time.time()
-    print('Time used: ', t2 - t1)
+    print("Time used: {}m {}s".format((t2 - t1) // 60, (t2 - t1) % 60))
     image_embeddings_cat = np.concatenate(image_embeddings)
     labels = np.concatenate(labels)
     # Create a linear regression model and fit it to the training data
-    model = LogisticRegression(max_iter=1000) 
+    model = LogisticRegression(max_iter=1000)
     model.fit(image_embeddings_cat, labels)
-    
+
     return model
+
 
 def test_visualize(args, model):
     data_path = args.data_path
     model_type = args.model_type
     checkpoint = args.checkpoint
     device = args.device
-    
-    # register SAM
-    sam = sam_model_registry[model_type](checkpoint=checkpoint).to(device)
-    # mask_generator = SamAutomaticMaskGenerator(sam)
-    predictor = SamPredictor(sam)
-    
+
     num_image = args.k
     fnames = os.listdir(os.path.join(data_path, 'images'))
-    random.shuffle(fnames)
+    random.shuffle(fnames)  # 所以要固定random.seed就是因为这里取后面990个就直接是验证集了。
     fnames = fnames[num_image:]
     num_visualize = args.visualize_num
     i = 0
-    
-    dice_linear=[]
-    dice1=[]
-    dice2=[]
-    dice3=[]
+
+    dice_linear = []
+    dice1 = []
+    dice2 = []
+    dice3 = []
     i = 0
 
     gts = []
-    pred_linear=[]
-    point_sam=[]
-    box_sam=[]
+    pred_linear = []
+    point_sam = []
+    box_sam = []
     for fname in tqdm(fnames[:num_visualize]):
         # read data
         image = cv2.imread(os.path.join(data_path, 'images', fname))
@@ -105,27 +99,27 @@ def test_visualize(args, model):
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
         _, mask = cv2.threshold(mask, 128, 1, cv2.THRESH_BINARY)
         H, W, _ = image.shape
-        
+
         # get the image embedding and flatten it
-        img_emb = get_embedding(image, predictor)
+        img_emb = get_embedding(image)
         img_emb = img_emb.cpu().numpy().transpose((2, 3, 1, 0)).reshape((64, 64, 256)).reshape(-1, 256)
-        
+
         # get the mask predicted by the linear classifier
         y_pred = model.predict(img_emb)
         y_pred = y_pred.reshape((64, 64))
         # mask predicted by the linear classifier
         mask_pred_l = cv2.resize(y_pred, (mask.shape[1], mask.shape[0]), interpolation=cv2.INTER_NEAREST)
-        
+
         # use distance transform to find a point inside the mask
         fg_point = get_max_dist_point(mask_pred_l)
         # Define the kernel for dilation
         kernel = np.ones((5, 5), np.uint8)
         eroded_mask = cv2.erode(mask_pred_l, kernel, iterations=3)
         mask_pred_l = cv2.dilate(eroded_mask, kernel, iterations=5)
-        
+
         # set the image to sam
         predictor.set_image(image)
-        
+
         # prompt the sam with the point
         input_point = np.array([[fg_point[0], fg_point[1]]])
         input_label = np.array([1])
@@ -135,7 +129,7 @@ def test_visualize(args, model):
             box=None,
             multimask_output=False,
         )
-        
+
         # prompt the sam with the bounding box
         y_indices, x_indices = np.where(mask_pred_l > 0)
         if np.all(mask_pred_l == 0):
@@ -153,15 +147,15 @@ def test_visualize(args, model):
             point_coords=None,
             point_labels=None,
             box=bbox[None, :],
-            multimask_output=False,)
-            
+            multimask_output=False, )
+
         # prompt the sam with both the point and bounding box
         masks_pred_sam_prompted3, _, _ = predictor.predict(
             point_coords=input_point,
             point_labels=input_label,
             box=bbox[None, :],
-            multimask_output=False,)
-        
+            multimask_output=False, )
+
         dice_l = dice_coef(mask, mask_pred_l)
         dice_p = dice_coef(mask, masks_pred_sam_prompted1[0])
         dice_b = dice_coef(mask, masks_pred_sam_prompted2[0])
@@ -180,7 +174,7 @@ def test_visualize(args, model):
         ax[1].imshow(mask_pred_l)
         ax[2].set_title('Point')
         ax[2].plot(fg_point[0], fg_point[1], 'r.')
-        ax[2].imshow(masks_pred_sam_prompted1[0]) 
+        ax[2].imshow(masks_pred_sam_prompted1[0])
         ax[3].set_title('Box')
         show_box(bbox, ax[3])
         ax[3].imshow(masks_pred_sam_prompted2[0])
@@ -189,25 +183,23 @@ def test_visualize(args, model):
         show_box(bbox, ax[4])
         ax[4].imshow(masks_pred_sam_prompted3[0])
         [axi.set_axis_off() for axi in ax.ravel()]
-        
-        
+
         if os.path.exists(args.save_path) == False:
             os.mkdir(args.save_path)
-        plt.savefig(os.path.join(args.save_path, fname.split('.')[0]+str(i)))
-    
-    mdice0 = round(sum(dice_linear)/float(len(dice_linear)), 5)
-    mdice1 = round(sum(dice1)/float(len(dice1)), 5)
-    mdice2 = round(sum(dice2)/float(len(dice2)), 5)
-    mdice3 = round(sum(dice3)/float(len(dice3)), 5)
-    
+        plt.savefig(os.path.join(args.save_path, fname.split('.')[0] + str(i)))
+
+    mdice0 = round(sum(dice_linear) / float(len(dice_linear)), 5)
+    mdice1 = round(sum(dice1) / float(len(dice1)), 5)
+    mdice2 = round(sum(dice2) / float(len(dice2)), 5)
+    mdice3 = round(sum(dice3) / float(len(dice3)), 5)
+
     print('For the first {} images: '.format(num_visualize))
     print('mdice(linear classifier: )', mdice0)
     print('mDice(point prompts): ', mdice1)
     print('mDice(bbox prompts): ', mdice2)
     print('mDice(points and boxes): ', mdice3)
 
-        
-        
+
 def test(args):
     data_path = args.data_path
     model_type = args.model_type
@@ -226,14 +218,14 @@ def test(args):
         _, mask = cv2.threshold(mask, 128, 1, cv2.THRESH_BINARY)
         images.append(image)
         masks.append(mask)
-    
+
     kf = KFold(n_splits=5, shuffle=True, random_state=42)
     for train_index, text_index in kf.split(images):
         train_images = [images[i] for i in train_index]
         train_masks = [masks[i] for i in train_index]
         test_images = [images[i] for i in text_index]
         test_masks = [masks[i] for i in text_index]
-        
+
         # train the linear classifier
         k = args.k
         random_indices = random.sample(range(len(train_images)), k)
@@ -248,18 +240,18 @@ def test(args):
             img_emb = img_emb.cpu().numpy().transpose((2, 3, 1, 0)).reshape((64, 64, 256)).reshape(-1, 256)
             image_embeddings.append(img_emb)
             labels.append(downsampled_mask.flatten())
-                
-        image_embeddings_cat = numpy.concatenate(image_embeddings)
-        labels = numpy.concatenate(labels)
 
-        model = LogisticRegression(max_iter=1000) # how to set parameters?? C, max_iter, verbose, solver
+        image_embeddings_cat = np.concatenate(image_embeddings)
+        labels = np.concatenate(labels)
+
+        model = LogisticRegression(max_iter=1000)  # how to set parameters?? C, max_iter, verbose, solver
         model.fit(image_embeddings_cat, labels)
 
         # test
-        dice_linear=[]
-        dice1=[]
-        dice2=[]
-        dice3=[]
+        dice_linear = []
+        dice1 = []
+        dice2 = []
+        dice3 = []
         for idx in range(len(test_images)):
             image = test_images[idx]
             mask = test_masks[idx]
@@ -270,7 +262,7 @@ def test(args):
 
             # ger the mask predicted by the linear classifier
             y_pred = model.predict(img_emb)
-            y_pred = y_pred.reshape((64,64))
+            y_pred = y_pred.reshape((64, 64))
             mask_pred_l = cv2.resize(y_pred, (mask.shape[1], mask.shape[0]), interpolation=cv2.INTER_NEAREST)
 
             # use distance transform to find a point inside the mask
@@ -289,15 +281,15 @@ def test(args):
             input_point = np.array([[fg_point[0], fg_point[1]]])
             input_label = np.array([1])
             masks_pred_sam_prompted1, _, logits = predictor.predict(
-            point_coords=input_point,
-            point_labels=input_label,
-            box=None,
-            multimask_output=False,)
+                point_coords=input_point,
+                point_labels=input_label,
+                box=None,
+                multimask_output=False, )
 
             # prompt sam with the bbox
             y_indices, x_indices = np.where(mask_pred_l > 0)
-            if np.all(mask_pred_l==0):
-                bbox = np.array([0 ,0, H, W])
+            if np.all(mask_pred_l == 0):
+                bbox = np.array([0, 0, H, W])
             else:
                 x_min, x_max = np.min(x_indices), np.max(x_indices)
                 y_min, y_max = np.min(y_indices), np.max(y_indices)
@@ -308,16 +300,16 @@ def test(args):
                 y_max = min(H, y_max + np.random.randint(0, 20))
                 bbox = np.array([x_min, y_min, x_max, y_max])
                 masks_pred_sam_prompted2, _, _ = predictor.predict(
-                point_coords=None,
-                point_labels=None,
-                box=bbox[None, :],
-                multimask_output=False,)
+                    point_coords=None,
+                    point_labels=None,
+                    box=bbox[None, :],
+                    multimask_output=False, )
 
-                masks_pred_sam_prompted3, _, _,= predictor.predict(
-                point_coords=input_point,
-                point_labels=input_label,
-                box=bbox[None, :],
-                multimask_output=False,)
+                masks_pred_sam_prompted3, _, _, = predictor.predict(
+                    point_coords=input_point,
+                    point_labels=input_label,
+                    box=bbox[None, :],
+                    multimask_output=False, )
 
                 dice_l = dice_coef(mask, mask_pred_l)
                 dice_p = dice_coef(mask, masks_pred_sam_prompted1[0])
@@ -327,29 +319,17 @@ def test(args):
                 dice1.append(dice_p)
                 dice2.append(dice_b)
                 dice3.append(dice_c)
-                
-        mdice0 = round(sum(dice_linear)/float(len(dice_linear)), 5)
-        mdice1 = round(sum(dice1)/float(len(dice1)), 5)
-        mdice2 = round(sum(dice2)/float(len(dice2)), 5)
-        mdice3 = round(sum(dice3)/float(len(dice3)), 5)
+
+        mdice0 = round(sum(dice_linear) / float(len(dice_linear)), 5)
+        mdice1 = round(sum(dice1) / float(len(dice1)), 5)
+        mdice2 = round(sum(dice2) / float(len(dice2)), 5)
+        mdice3 = round(sum(dice3) / float(len(dice3)), 5)
 
         print('mdice(linear classifier: )', mdice0)
         print('mDice(point prompts): ', mdice1)
         print('mDice(bbox prompts): ', mdice2)
         print('mDice(points and boxes): ', mdice3)
         print('\n')
-
-    
-
-
-
-
-
-
-
-
-
-
 
 
 def main():
@@ -367,10 +347,13 @@ def main():
 
     # set random seed
     random.seed(42)
-    
-    
 
-    
+    # register SAM
+    sam = sam_model_registry[args.model_type](checkpoint=args.checkpoint).to(args.device)
+    global predictor
+    predictor = SamPredictor(sam)
+    print('SAM model loaded!', '\n')
+
     if args.visualize:
         model = train(args)
         test_visualize(args, model)
