@@ -22,9 +22,6 @@ def get_embedding(img):
 
 def train(args):
     data_path = args.data_path
-    model_type = args.model_type
-    checkpoint = args.checkpoint
-    device = args.device
     assert os.path.exists(data_path), 'data path does not exist!'
 
 
@@ -70,9 +67,6 @@ def train(args):
 
 def test_visualize(args, model):
     data_path = args.data_path
-    model_type = args.model_type
-    checkpoint = args.checkpoint
-    device = args.device
 
     num_image = args.k
     fnames = os.listdir(os.path.join(data_path, 'images'))
@@ -202,9 +196,6 @@ def test_visualize(args, model):
 
 def test(args):
     data_path = args.data_path
-    model_type = args.model_type
-    checkpoint = args.checkpoint
-    device = args.device
     images = []
     masks = []
     fnames = os.listdir(os.path.join(data_path, 'images'))
