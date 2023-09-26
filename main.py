@@ -1,4 +1,5 @@
 import cv2
+import numpy
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -19,19 +20,13 @@ def get_embedding(img, predictor):
     img_emb = predictor.get_image_embedding()
     return img_emb
 
-def train(args):
+
+def train(args, predictor):
     data_path = args.data_path
-    model_type = args.model_type
-    checkpoint = args.checkpoint
-    device = args.device
     assert os.path.exists(data_path), 'data path does not exist!'
-    # register SAM
-    sam = sam_model_registry[model_type](checkpoint=checkpoint).to(device)
-    mask_generator = SamAutomaticMaskGenerator(sam)
-    predictor = SamPredictor(sam)
-    print('SAM model loaded!', '\n')
+
     num_image = args.k
-    i = 0 
+
     fnames = os.listdir(os.path.join(data_path, 'images'))
     # get 20 random indices from fnames
     random.shuffle(fnames)
@@ -42,13 +37,14 @@ def train(args):
     # get the image embeddings
     print('Start training...')
     t1 = time.time()
+    i = 0 
     for fname in tqdm(fnames):
         # read data
         image = cv2.imread(os.path.join(data_path, 'images', fname))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mask = cv2.imread(os.path.join(data_path, 'masks', fname))
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
-        _, mask = cv2.threshold(mask, 128, 1, cv2.THRESH_BINARY)
+        _, mask = cv2.threshold(mask, 128, 1, cv2.THRESH_BINARY) # threshold the mask to 0 and 1
         downsampled_mask = cv2.resize(mask, dsize=(64, 64), interpolation=cv2.INTER_NEAREST)
          
         img_emb = get_embedding(image, predictor)
@@ -60,43 +56,31 @@ def train(args):
         i += 1
         if i > num_image: break
     t2 = time.time()
-    print('Time used: ', t2 - t1)
+    print("Time used: {}m {}s".format((t2 - t1) // 60, (t2 - t1) % 60))
     image_embeddings_cat = np.concatenate(image_embeddings)
     labels = np.concatenate(labels)
+
     # Create a linear regression model and fit it to the training data
     model = LogisticRegression(max_iter=1000) 
     model.fit(image_embeddings_cat, labels)
     
     return model
 
-def test_visualize(args, model):
+def test_visualize(args, model, predictor):
     data_path = args.data_path
-    model_type = args.model_type
-    checkpoint = args.checkpoint
-    device = args.device
-    
-    # register SAM
-    sam = sam_model_registry[model_type](checkpoint=checkpoint).to(device)
-    # mask_generator = SamAutomaticMaskGenerator(sam)
-    predictor = SamPredictor(sam)
-    
+        
     num_image = args.k
     fnames = os.listdir(os.path.join(data_path, 'images'))
     random.shuffle(fnames)
     fnames = fnames[num_image:]
     num_visualize = args.visualize_num
-    i = 0
     
-    dice_linear=[]
-    dice1=[]
-    dice2=[]
-    dice3=[]
+    dice_linear = []
+    dice1 = []
+    dice2 = []
+    dice3 = []
     i = 0
 
-    gts = []
-    pred_linear=[]
-    point_sam=[]
-    box_sam=[]
     for fname in tqdm(fnames[:num_visualize]):
         # read data
         image = cv2.imread(os.path.join(data_path, 'images', fname))
@@ -208,11 +192,8 @@ def test_visualize(args, model):
 
         
         
-def test(args):
+def test(args, predictor):
     data_path = args.data_path
-    model_type = args.model_type
-    checkpoint = args.checkpoint
-    device = args.device
     images = []
     masks = []
     fnames = os.listdir(os.path.join(data_path, 'images'))
@@ -341,17 +322,6 @@ def test(args):
 
     
 
-
-
-
-
-
-
-
-
-
-
-
 def main():
     parser = argparse.ArgumentParser()
 
@@ -368,14 +338,17 @@ def main():
     # set random seed
     random.seed(42)
     
-    
-
+    # register the SAM model
+    sam = sam_model_registry[args.model_type](checkpoint=args.checkpoint).to(args.device)
+    global predictor
+    predictor = SamPredictor(sam)
+    print('SAM model loaded!', '\n')
     
     if args.visualize:
-        model = train(args)
-        test_visualize(args, model)
+        model = train(args, predictor)
+        test_visualize(args, model, predictor)
     else:
-        test(args)
+        test(args, predictor)
 
 
 if __name__ == '__main__':

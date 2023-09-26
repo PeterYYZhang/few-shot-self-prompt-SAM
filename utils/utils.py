@@ -67,14 +67,3 @@ def get_max_dist_point(mask):
   point = (max_dist_idx[1][0], max_dist_idx[0][0])  # (x, y) coordinates
 
   return point
-
-def get_min_dist_point(mask):
-  # Compute the distance transform of the binary mask
-  dist_transform = cv2.distanceTransform(mask, cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
-
-  # Find the location of the point with maximum distance value
-  max_dist = np.min(dist_transform)
-  max_dist_idx = np.where(dist_transform == max_dist)
-  point = (max_dist_idx[1][0], max_dist_idx[0][0])  # (x, y) coordinates
-
-  return point

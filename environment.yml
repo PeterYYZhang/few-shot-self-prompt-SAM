@@ -9,3 +9,5 @@ dependencies:
   - pytorch-cuda=11.7
   - scikit-learn
   - tqdm
+  - matplotlib
+  - opencv
