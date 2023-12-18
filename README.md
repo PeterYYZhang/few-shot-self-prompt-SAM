@@ -27,7 +27,8 @@ and then the results will be seen under ```./results```.
 
 ## Citation
 If you find our work useful, please cite us. The BibTeX:
-```@inproceedings{wu2023self,
+```
+@inproceedings{wu2023self,
   title={Self-prompting large vision models for few-shot medical image segmentation},
   author={Wu, Qi and Zhang, Yuyao and Elbatel, Marawan},
   booktitle={MICCAI Workshop on Domain Adaptation and Representation Transfer},
