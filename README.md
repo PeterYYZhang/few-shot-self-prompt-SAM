@@ -34,5 +34,5 @@ If you find our work useful, please cite us. The BibTeX:
   pages={156--167},
   year={2023},
   organization={Springer}
-  }```
+  }
 
