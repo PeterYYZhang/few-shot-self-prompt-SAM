@@ -26,7 +26,7 @@ and then the results will be seen under ```./results```.
 - To get the result for 5-fold validation: run ```python main.py --checkpoint <path/to/checkpoints/checkpoint> --model_type <model_type> --data_path <path/to/data> --k <num_of_training_images> --visualize False >> validation_result.txt```
 
 ## Citation
-If you find our work useful, please cite us. The BibTeX:
+If you find our work useful, please cite us. The BibTeX is as follows.
 ```
 @inproceedings{wu2023self,
   title={Self-prompting large vision models for few-shot medical image segmentation},
@@ -35,5 +35,5 @@ If you find our work useful, please cite us. The BibTeX:
   pages={156--167},
   year={2023},
   organization={Springer}
-  }
+}
 
