@@ -225,7 +225,7 @@ def test(args, predictor):
             mask = train_masks[idx]
             downsampled_mask = cv2.resize(mask, dsize=(64, 64), interpolation=cv2.INTER_NEAREST)
 
-            img_emb = get_embedding(image)
+            img_emb = get_embedding(image, predictor)
             img_emb = img_emb.cpu().numpy().transpose((2, 3, 1, 0)).reshape((64, 64, 256)).reshape(-1, 256)
             image_embeddings.append(img_emb)
             labels.append(downsampled_mask.flatten())
@@ -246,7 +246,7 @@ def test(args, predictor):
             mask = test_masks[idx]
             H, W, _ = image.shape
 
-            img_emb = get_embedding(image)
+            img_emb = get_embedding(image, predictor)
             img_emb = img_emb.cpu().numpy().transpose((2, 3, 1, 0)).reshape((64, 64, 256)).reshape(-1, 256)
 
             # ger the mask predicted by the linear classifier
